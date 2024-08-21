@@ -13,9 +13,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     detectVideoBtn.addEventListener('click', () => {
         console.log('Detect video button clicked');
-        // TODO: Implement video detection logic
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            if (!tabs[0]) {
+                console.error('No active tab found');
+                statusMessage.textContent = "Error: Cannot detect video on this page.";
+                return;
+            }
             chrome.tabs.sendMessage(tabs[0].id, {action: "detectVideo"}, (response) => {
+                if (chrome.runtime.lastError) {
+                    console.error('Error sending message:', chrome.runtime.lastError);
+                    statusMessage.textContent = "Error detecting video. Please try again.";
+                    return;
+                }
                 if (response && response.videoUrl) {
                     detectedVideoUrl = response.videoUrl;
                     videoUrlInput.value = detectedVideoUrl;
@@ -35,39 +44,48 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // TODO: Implement actual summarization logic
         statusMessage.textContent = "Processing video...";
         progressBarFill.style.width = "0%";
 
-        // Simulating video processing with a timer
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 10;
-            progressBarFill.style.width = `${progress}%`;
-            if (progress >= 100) {
-                clearInterval(interval);
-                processedVideoUrl = "https://example.com/processed-video.mp4"; // Replace with actual processed video URL
+        chrome.runtime.sendMessage({ action: "summarizeVideo", videoUrl: videoUrl }, (response) => {
+            if (response.success) {
+                processedVideoUrl = response.processedVideoUrl;
                 statusMessage.textContent = "Video summarized successfully!";
                 summaryOutput.textContent = `Original video: ${videoUrl}\nSummarized video: ${processedVideoUrl}`;
+            } else {
+                statusMessage.textContent = "Error summarizing video. Please try again.";
             }
-        }, 500);
-
-        // In a real implementation, you would call your backend API here
-        // and update the progress bar and status message based on the response
+        });
     });
 
     exportBtn.addEventListener('click', () => {
         console.log('Export button clicked');
         if (processedVideoUrl) {
-            // TODO: Implement export functionality (e.g., copy to clipboard or download)
             navigator.clipboard.writeText(processedVideoUrl).then(() => {
                 statusMessage.textContent = "Processed video URL copied to clipboard!";
+                // Provide visual feedback
+                exportBtn.textContent = "Copied!";
+                setTimeout(() => {
+                    exportBtn.textContent = "Export Short Video";
+                }, 2000);
             }).catch(err => {
-                console.error('Failed to copy: ', err);
+                console.error('Failed to copy:', err);
                 statusMessage.textContent = "Failed to copy URL. Please try again.";
             });
         } else {
             statusMessage.textContent = "Please summarize a video first.";
+            // Provide visual feedback
+            exportBtn.disabled = true;
+            setTimeout(() => {
+                exportBtn.disabled = false;
+            }, 2000);
+        }
+    });
+
+    // Listen for progress updates from the background script
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === "updateProgress") {
+            progressBarFill.style.width = `${request.progress}%`;
         }
     });
 });
