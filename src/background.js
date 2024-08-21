@@ -10,6 +10,9 @@ chrome.action.onClicked.addListener((tab) => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "getSidebarState") {
     sendResponse({ open: sidebarOpen });
+  } else if (request.action === "summarizeVideo") {
+    // TODO: Implement actual summarization logic
+    sendResponse({ summary: "This is a placeholder summary." });
   }
 });
 

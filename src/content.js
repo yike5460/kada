@@ -1,17 +1,20 @@
 let sidebar;
 
 function createSidebar() {
-  sidebar = document.createElement('div');
+  sidebar = document.createElement('iframe');
   sidebar.id = 'video-summarizer-sidebar';
-  sidebar.innerHTML = `
-    <h2>Video Summarizer</h2>
-    <button id="summarize-btn">Summarize Video</button>
-    <div id="summary-output"></div>
-    <div id="edit-controls"></div>
+  sidebar.src = chrome.runtime.getURL('sidebar.html');
+  sidebar.style.cssText = `
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    border: none;
+    z-index: 9999;
+    display: none;
   `;
   document.body.appendChild(sidebar);
-  
-  document.getElementById('summarize-btn').addEventListener('click', summarizeVideo);
 }
 
 function toggleSidebar(open) {

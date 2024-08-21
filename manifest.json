@@ -21,5 +21,11 @@
       "js": ["src/content.js"],
       "css": ["src/sidebar.css"]
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["sidebar.html"],
+      "matches": ["*://*.youtube.com/*"]
+    }
   ]
 }
