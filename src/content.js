@@ -41,3 +41,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 chrome.runtime.sendMessage({ action: "getSidebarState" }, (response) => {
   toggleSidebar(response.open);
 });
+
+// Add this to your existing content.js file
+
+function detectVideoOnPage() {
+    const videoElements = document.querySelectorAll('video');
+    if (videoElements.length > 0) {
+        return videoElements[0].src;
+    }
+    return null;
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "detectVideo") {
+        const videoUrl = detectVideoOnPage();
+        sendResponse({videoUrl: videoUrl});
+    }
+});

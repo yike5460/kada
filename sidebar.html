@@ -23,10 +23,29 @@
             border: none;
             cursor: pointer;
         }
-        textarea {
+        input, textarea {
             width: 100%;
-            height: 100px;
+            padding: 5px;
             margin-top: 10px;
+        }
+        #progress-bar {
+            width: 100%;
+            background-color: #f0f0f0;
+            padding: 3px;
+            border-radius: 3px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, .2);
+            margin-top: 10px;
+        }
+        #progress-bar-fill {
+            display: block;
+            height: 22px;
+            background-color: #659cef;
+            border-radius: 3px;
+            transition: width 500ms ease-in-out;
+        }
+        #status-message {
+            margin-top: 10px;
+            font-weight: bold;
         }
         #summary-output {
             margin-top: 10px;
@@ -36,29 +55,19 @@
             max-height: 200px;
             overflow-y: auto;
         }
-        .guidance {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #666;
-        }
     </style>
 </head>
 <body>
     <h2>Video Summarizer</h2>
+    <input type="text" id="video-url" placeholder="Enter video URL (optional)">
+    <button id="detect-video-btn">Detect Video on Page</button>
     <button id="summarize-btn">Summarize Video</button>
-    <textarea id="custom-prompt" placeholder="Enter custom instructions (optional)"></textarea>
-    <div id="summary-output"></div>
-    <button id="edit-btn">Edit Summary</button>
-    <button id="export-btn">Export Summary</button>
-    <div class="guidance">
-        <p>How to use:</p>
-        <ol>
-            <li>Click "Summarize Video" to generate a summary</li>
-            <li>Optionally, enter custom instructions before summarizing</li>
-            <li>Edit the summary if needed</li>
-            <li>Export the final summary</li>
-        </ol>
+    <div id="progress-bar">
+        <span id="progress-bar-fill" style="width: 0%"></span>
     </div>
+    <div id="status-message"></div>
+    <div id="summary-output"></div>
+    <button id="export-btn">Export Short Video</button>
     <script src="sidebar.js"></script>
 </body>
 </html>
