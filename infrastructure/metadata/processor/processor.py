@@ -69,14 +69,118 @@ def GetSegmentDetectionResults(jobId, s3Object, s3Bucket, iframePath, maxRetry=1
     paginationToken = ""
     finished = False
     firstTime = True
-    slicedFilelist = []
+    # slicedFilelist = []
 
     while finished == False:
         response = rek.get_segment_detection(
             JobId=jobId, MaxResults=maxResults, NextToken=paginationToken
         )
         logger.info('rekognition response: {}'.format(json.dumps(response)))
-        
+        """
+        Sample response:
+        {
+            "JobStatus": "SUCCEEDED",
+            "VideoMetadata": [
+                {
+                    "Codec": "h264",
+                    "DurationMillis": 53428,
+                    "Format": "QuickTime / MOV",
+                    "FrameRate": 23.976024627685547,
+                    "FrameHeight": 720,
+                    "FrameWidth": 1280,
+                    "ColorRange": "LIMITED"
+                }
+            ],
+            "AudioMetadata": [
+                {
+                    "Codec": "aac",
+                    "DurationMillis": 53440,
+                    "SampleRate": 48000,
+                    "NumberOfChannels": 2
+                }
+            ],
+            "Segments": [
+                {
+                    "Type": "TECHNICAL_CUE",
+                    "StartTimestampMillis": 0,
+                    "EndTimestampMillis": 53386,
+                    "DurationMillis": 53386,
+                    "StartTimecodeSMPTE": "00:00:00:00",
+                    "EndTimecodeSMPTE": "00:00:53:08",
+                    "DurationSMPTE": "00:00:53:08",
+                    "TechnicalCueSegment": {
+                        "Type": "Content",
+                        "Confidence": 100
+                    },
+                    "StartFrameNumber": 0,
+                    "EndFrameNumber": 1280,
+                    "DurationFrames": 1280
+                },
+                {
+                    "Type": "SHOT",
+                    "StartTimestampMillis": 0,
+                    "EndTimestampMillis": 53386,
+                    "DurationMillis": 53386,
+                    "StartTimecodeSMPTE": "00:00:00:00",
+                    "EndTimecodeSMPTE": "00:00:53:08",
+                    "DurationSMPTE": "00:00:53:08",
+                    "ShotSegment": {
+                        "Index": 0,
+                        "Confidence": 100
+                    },
+                    "StartFrameNumber": 0,
+                    "EndFrameNumber": 1280,
+                    "DurationFrames": 1280
+                }
+            ],
+            "SelectedSegmentTypes": [
+                {
+                    "Type": "SHOT",
+                    "ModelVersion": "2.0"
+                },
+                {
+                    "Type": "TECHNICAL_CUE",
+                    "ModelVersion": "2.0"
+                }
+            ],
+            "JobId": "da9f552b1ce0feae3a01c36b4a7d21e49cb94e97f3c6ea8f14857047eefbcb65",
+            "Video": {
+                "S3Object": {
+                    "Bucket": "kadastack-processed-video",
+                    "Name": "clip_sample-01-iframe-output.mp4"
+                }
+            },
+            "ResponseMetadata": {
+                "RequestId": "cfc9ddd7-7766-42ef-8e94-23d83b974337",
+                "HTTPStatusCode": 200,
+                "HTTPHeaders": {
+                    "x-amzn-requestid": "cfc9ddd7-7766-42ef-8e94-23d83b974337",
+                    "content-type": "application/x-amz-json-1.1",
+                    "content-length": "1217",
+                    "date": "Tue, 20 Aug 2024 14:49:52 GMT"
+                },
+                "RetryAttempts": 0
+            }
+        }
+TECHNICAL_CUE:
+- Represents technical aspects of the video.
+- Types include: Black Frames, Color Bars, End Credits, Opening Credits, Studio Logo, Slate, Content.
+- Useful for identifying structural elements of the video.
+- Often used in broadcast and professional video production workflows.
+
+SHOT:
+- Represents a continuous sequence of frames without a camera cut.
+- Indicates scene changes or transitions in the video.
+- Useful for understanding the visual structure and pacing of the video.
+- Often used in video editing and content analysis.
+
+For extracting a 3-5 minute video from a longer one based on video understanding, the SHOT segment type is generally more suitable due to considerations such as:
+
+- Content-based segmentation: SHOT detection is more closely aligned with the actual content and narrative structure of the video. It identifies where the camera angle or scene changes, which often correlates with changes in the video's subject matter or focus.
+- Semantic understanding: Shots often represent distinct semantic units in the video, making them more useful for understanding and summarizing the content.
+- Granularity: Shots provide a finer level of granularity compared to most TECHNICAL_CUEs, allowing for more precise selection of important parts of the video.
+- Narrative flow: By using shot boundaries, you're more likely to maintain a coherent narrative flow in your extracted video, as these boundaries often align with natural break points in the story or content.
+        """
         if firstTime == True:
             print(f"Status\n------\n{response['JobStatus']}")
             # print("\nRequested Types\n---------------")
@@ -103,7 +207,8 @@ def GetSegmentDetectionResults(jobId, s3Object, s3Bucket, iframePath, maxRetry=1
             #     print(f"\tFrameWidth: {videoMetadata['FrameWidth']}")
             #     print("\nSegments\n--------")
             firstTime = False
-                
+
+        segments_meta = []
         for segment in response['Segments']:
             # print(f"\tDuration (milliseconds): {segment['DurationMillis']}")
             # print(f"\tStart Timestamp (milliseconds): {segment['StartTimestampMillis']}")
@@ -116,50 +221,6 @@ def GetSegmentDetectionResults(jobId, s3Object, s3Bucket, iframePath, maxRetry=1
             # print(f"\tStart frame number {segment['StartFrameNumber']}")
             # print(f"\tEnd frame number: {segment['EndFrameNumber']}")
             # print(f"\tDuration frames: {segment['DurationFrames']}")
-
-            
-            RANDOM_VIDEO_FILE = str(uuid.uuid1()) + '-sliced-output.mp4'
-            REMOTE_SLICED_VIDEO_FILE = s3Object.split('.')[0] + '/' + RANDOM_VIDEO_FILE
-            slicedFilelist.append(REMOTE_SLICED_VIDEO_FILE)
-            logger.info('slicedFilelist is as follows {}'.format(slicedFilelist))
-
-            detail = {
-                    'jobId': jobId,
-                    # iframe video path
-                    's3Object': s3Object,
-                    's3Bucket': s3Bucket,
-                    # predefined sliced video name
-                    'randomVideoFile': RANDOM_VIDEO_FILE,
-                    # start timecode and duration for sliced video
-                    'startTimecodeSMPTE': segment['StartTimecodeSMPTE'].rsplit(':', 1)[0],
-                    'durationSMPTE': segment['DurationSMPTE'].rsplit(':', 1)[0]
-            }
-            # fetch video shots info and sent to eventbridge for successive processing
-            eventEntries = {
-                'Time': time.time(),
-                'Source': 'custom',
-                'EventBusName': os.environ.get('EVENT_BUS_NAME'),
-                'DetailType': 'videoShotsAndGif',
-                'Detail': json.dumps(detail)
-            }
-            logger.info('eventEntries: {}'.format(json.dumps(eventEntries)))
-            
-            # put events to eventbridge
-            event.put_events(Entries=[eventEntries])
-
-            attemptCount = 0
-            MAX_ATTEMPT = 3
-            while (attemptCount < int(MAX_ATTEMPT)):
-                ret = event.put_events(Entries=[eventEntries])
-                # check ErrorCode or ErrorMessage for possible failure and retry
-                try:
-                    if ret['FailedEntryCount'] == 0:
-                        logger.info('put events result as follows\n %s' % json.dumps(response, indent=4))
-                        break
-                except:
-                    logger.info('put events failed, retry after %s seconds' % retryInterval)
-                    time.sleep(retryInterval)
-                attemptCount += 1
 
             """
             # generate random video clips from iframe video
@@ -188,6 +249,15 @@ def GetSegmentDetectionResults(jobId, s3Object, s3Bucket, iframePath, maxRetry=1
             except subprocess.CalledProcessError as e:
                 logger.error("Error: {}, return code {}".format(e.output.decode('utf-8'), e.returncode))
             """
+            if segment['Type'] == 'SHOT':
+                segment_info = {
+                    'startTimecodeSMPTE': segment['StartTimecodeSMPTE'].rsplit(':', 1)[0],
+                    'durationSMPTE': segment['DurationSMPTE'].rsplit(':', 1)[0],
+                    'startTimestampMillis': segment['StartTimestampMillis'],
+                    'endTimestampMillis': segment['EndTimestampMillis'],
+                    'durationMillis': segment['DurationMillis']
+                }
+                segments_meta.append(segment_info)
 
         if "NextToken" in response:
             paginationToken = response["NextToken"]
@@ -200,25 +270,63 @@ def GetSegmentDetectionResults(jobId, s3Object, s3Bucket, iframePath, maxRetry=1
             # ffmpeg -f concat -safe 0 -i segments.txt -c copy output.mp4
             # ffmpeg -i segments.txt -c copy output.mp4
 
-    # update sliced video info to dynamoDB
-    logger.info('dynamoDB key is {}'.format(s3Object.split('.')[0].rsplit('-')[0] + '.' + s3Object.split('.')[1]))
+        # RANDOM_VIDEO_FILE = str(uuid.uuid1()) + '-sliced-output.mp4'
+        # REMOTE_SLICED_VIDEO_FILE = s3Object.split('.')[0] + '/' + RANDOM_VIDEO_FILE
+        # slicedFilelist.append(REMOTE_SLICED_VIDEO_FILE)
+        # logger.info('slicedFilelist is as follows {}'.format(slicedFilelist))
 
-    response = table.update_item(
-        Key={
-            # strip -iframe-output to restore original video name, 'SampleVideo_1280x720_30mb-iframe-output.mp4' to 'SampleVideo_1280x720_30mb.mp4'
-            'id': s3Object.split('.')[0].rsplit('-')[0] + '.' + s3Object.split('.')[1]
-        },
-        UpdateExpression="set #s3ObjectName = :s3ObjectName, #s3Bucket = :s3Bucket",
-        ExpressionAttributeNames={
-            '#s3ObjectName': 's3ObjectName',
-            '#s3Bucket': 's3Bucket'
-        },
-        ExpressionAttributeValues={
-            ':s3ObjectName': slicedFilelist,
-            ':s3Bucket': s3Bucket
+        detail = {
+            'jobId': jobId,
+            # iframe video path
+            's3Object': s3Object,
+            's3Bucket': s3Bucket,
+            'segmentsMeta': segments_meta
         }
-    )
-    logger.info("Updated sliced video info to dynamoDB")
+
+        eventEntries = {
+            'Time': time.time(),
+            'Source': 'custom',
+            'EventBusName': os.environ.get('EVENT_BUS_NAME'),
+            'DetailType': 'videoShotsAndGif',
+            'Detail': json.dumps(detail)
+        }
+        logger.info('eventEntries: {}'.format(json.dumps(eventEntries)))
+
+        # put events to eventbridge
+        event.put_events(Entries=[eventEntries])
+
+        attemptCount = 0
+        MAX_ATTEMPT = 3
+        while (attemptCount < int(MAX_ATTEMPT)):
+            ret = event.put_events(Entries=[eventEntries])
+            # check ErrorCode or ErrorMessage for possible failure and retry
+            try:
+                if ret['FailedEntryCount'] == 0:
+                    logger.info('put events result as follows\n %s' % json.dumps(ret, indent=4))
+                    break
+            except:
+                logger.info('put events failed, retry after %s seconds' % retryInterval)
+                time.sleep(retryInterval)
+            attemptCount += 1
+
+    # # TBD, move this part to event.py, update sliced video info to dynamoDB
+    # logger.info('dynamoDB key is {}'.format(s3Object.split('.')[0].rsplit('-')[0] + '.' + s3Object.split('.')[1]))
+    # response = table.update_item(
+    #     Key={
+    #         # strip -iframe-output to restore original video name, 'SampleVideo_1280x720_30mb-iframe-output.mp4' to 'SampleVideo_1280x720_30mb.mp4'
+    #         'id': s3Object.split('.')[0].rsplit('-')[0] + '.' + s3Object.split('.')[1]
+    #     },
+    #     UpdateExpression="set #s3ObjectName = :s3ObjectName, #s3Bucket = :s3Bucket",
+    #     ExpressionAttributeNames={
+    #         '#s3ObjectName': 's3ObjectName',
+    #         '#s3Bucket': 's3Bucket'
+    #     },
+    #     ExpressionAttributeValues={
+    #         ':s3ObjectName': slicedFilelist,
+    #         ':s3Bucket': s3Bucket
+    #     }
+    # )
+    # logger.info("Updated sliced video info to dynamoDB")
 
 def upload_file(file_name, bucket, object_name=None):
     """Upload a file to an S3 bucket
