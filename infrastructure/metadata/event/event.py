@@ -126,6 +126,34 @@ def lambda_handler(event, context):
             except subprocess.CalledProcessError as e:
                 logger.error("Error: {}, return code {}".format(e.output.decode('utf-8'), e.returncode))
 
+        # Update sliced video and GIF info to DynamoDB
+        logger.info('DynamoDB key is {}'.format(s3Object.split('.')[0].rsplit('-')[0] + '.' + s3Object.split('.')[1]))
+        
+        sliced_video_list = [s3Object.split('.')[0] + '/' + segment['startTimecodeSMPTE'] + '-' + segment['durationSMPTE'] + '-sliced-output.mp4' for segment in segments_meta]
+        sliced_gif_list = [s3Object.split('.')[0] + '/' + segment['startTimecodeSMPTE'] + '-' + segment['durationSMPTE'] + '-sliced-output.gif' for segment in segments_meta]
+        try:
+            table.update_item(
+                Key={
+                # Strip -iframe-output to restore original video name, 'SampleVideo_1280x720_30mb-iframe-output.mp4' to 'SampleVideo_1280x720_30mb.mp4'
+                'id': s3Object.split('.')[0].rsplit('-')[0] + '.' + s3Object.split('.')[1]
+            },
+            UpdateExpression="set #slicedVideos = :slicedVideos, #slicedGifs = :slicedGifs, #s3Bucket = :s3Bucket",
+            ExpressionAttributeNames={
+                '#slicedVideos': 'slicedVideos',
+                '#slicedGifs': 'slicedGifs',
+                '#s3Bucket': 's3Bucket'
+            },
+            ExpressionAttributeValues={
+                ':slicedVideos': sliced_video_list,
+                ':slicedGifs': sliced_gif_list,
+                ':s3Bucket': s3Bucket
+            }
+        )
+            logger.info("Updated sliced video and GIF info to DynamoDB")
+        except Exception as e:
+            logger.error("Error: {}, return code {}".format(e.output.decode('utf-8'), e.returncode))
+            logger.error("Failed to update sliced video and GIF info to DynamoDB")
+
 def get_signed_url(expires_in, bucket, obj):
     """
     Generate a signed URL

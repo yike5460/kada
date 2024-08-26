@@ -309,25 +309,6 @@ For extracting a 3-5 minute video from a longer one based on video understanding
                 time.sleep(retryInterval)
             attemptCount += 1
 
-    # # TBD, move this part to event.py, update sliced video info to dynamoDB
-    # logger.info('dynamoDB key is {}'.format(s3Object.split('.')[0].rsplit('-')[0] + '.' + s3Object.split('.')[1]))
-    # response = table.update_item(
-    #     Key={
-    #         # strip -iframe-output to restore original video name, 'SampleVideo_1280x720_30mb-iframe-output.mp4' to 'SampleVideo_1280x720_30mb.mp4'
-    #         'id': s3Object.split('.')[0].rsplit('-')[0] + '.' + s3Object.split('.')[1]
-    #     },
-    #     UpdateExpression="set #s3ObjectName = :s3ObjectName, #s3Bucket = :s3Bucket",
-    #     ExpressionAttributeNames={
-    #         '#s3ObjectName': 's3ObjectName',
-    #         '#s3Bucket': 's3Bucket'
-    #     },
-    #     ExpressionAttributeValues={
-    #         ':s3ObjectName': slicedFilelist,
-    #         ':s3Bucket': s3Bucket
-    #     }
-    # )
-    # logger.info("Updated sliced video info to dynamoDB")
-
 def upload_file(file_name, bucket, object_name=None):
     """Upload a file to an S3 bucket
 
