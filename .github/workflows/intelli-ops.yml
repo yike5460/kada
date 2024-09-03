@@ -1,4 +1,4 @@
-name: Intelligent DevOps (Intelli-Ops) using Amazon Bedrock 
+name: Intelligent DevOps (Intelli-Ops) using Amazon Bedrock
 # Enable manual trigger
 on:
   workflow_dispatch:
@@ -63,7 +63,7 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         aws-region: us-east-1
         model-id: anthropic.claude-3-5-sonnet-20240620-v1:0
-        exclude-files: '*.md,*.json'
+        exclude-files: '*.md,*.json,*.yml,*.yaml'
         review-level: 'detailed'
         code-review: 'true'
         generate-pr-description: 'true'
