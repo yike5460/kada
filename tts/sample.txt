@@ -1,0 +1,21 @@
+Hello everyone, I am Adil Islam
+the Chief of Staff at Stability AI
+my team collaborate with AWS on groundbreaking solutions including SageMaker and Bedrock
+I'd like to take a moment to talk about one of our ongoing collaborative projects
+Stable Diffusion AWS Extension
+you can find on GitHub at the link shown on the screen
+This project represents a leap forward in our collaboration
+combining Stability's expertise in AI with AWS's robust cloud infrastructure
+users can migrate existing inference and training workload from standalone local client to AWS SageMaker
+with optimized efficiency on scaling and cost
+It's also helpful to promote Stable Diffusion to the broader open source community
+At Stability AI, we're helping to build an ecosystem where everyone can benefit from our advancements
+ thanks to open source
+And we are grateful to have AWS as our partner at this journey
+Looking ahead, we're excited about the potential for even deeper collaboration
+One area we're particularly excited about is the integration of our new SDXL model with AWS SageMaker
+This integration will allow us to leverage the full power of AWS's machine learning capabilities
+opening up new possibilities for innovation and customer value
+Finally, I want to express my deep gratitude to both the Stability AI and AWS teams
+Your hard work, dedication and creativity are what make this collaboration so successful
+ Thank you for all that you do.
