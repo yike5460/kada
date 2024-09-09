@@ -1,0 +1,84 @@
+1
+00:00:07,566 --> 00:00:09,833
+Hello everyone, I am Adil Islam
+
+2
+00:00:10,166 --> 00:00:11,666
+the Chief of Staff at Stability AI
+
+3
+00:00:11,666 --> 00:00:18,366
+my team collaborate with AWS on groundbreaking solutions including SageMaker and Bedrock
+
+4
+00:00:18,666 --> 00:00:23,033
+I'd like to take a moment to talk about one of our ongoing collaborative projects
+
+5
+00:00:23,033 --> 00:00:27,066
+Stable Diffusion AWS Extension
+
+6
+00:00:27,066 --> 00:00:30,833
+you can find on GitHub at the link shown on the screen
+
+7
+00:00:30,833 --> 00:00:34,333
+This project represents a leap forward in our collaboration
+
+8
+00:00:34,800 --> 00:00:40,233
+combining Stability's expertise in AI with AWS's robust cloud infrastructure
+
+9
+00:00:40,233 --> 00:00:47,333
+users can migrate existing inference and training workload from standalone local client to AWS SageMaker
+
+10
+00:00:47,333 --> 00:00:50,633
+with optimized efficiency on scaling and cost
+
+11
+00:00:50,633 --> 00:00:54,433
+It's also helpful to promote Stable Diffusion to the broader open source community
+
+12
+00:00:54,433 --> 00:01:00,999
+At Stability AI, we're helping to build an ecosystem where everyone can benefit from our advancements
+
+13
+00:01:00,999 --> 00:01:02,833
+ thanks to open source
+
+14
+00:01:02,833 --> 00:01:06,466
+And we are grateful to have AWS as our partner at this journey
+
+15
+00:01:06,466 --> 00:01:10,666
+Looking ahead, we're excited about the potential for even deeper collaboration
+
+16
+00:01:10,666 --> 00:01:18,266
+One area we're particularly excited about is the integration of our new SDXL model with AWS SageMaker
+
+17
+00:01:18,266 --> 00:01:24,466
+This integration will allow us to leverage the full power of AWS's machine learning capabilities
+
+18
+00:01:24,466 --> 00:01:28,833
+opening up new possibilities for innovation and customer value
+
+19
+00:01:28,833 --> 00:01:34,933
+Finally, I want to express my deep gratitude to both the Stability AI and AWS teams
+
+20
+00:01:34,933 --> 00:01:41,300
+Your hard work, dedication and creativity are what make this collaboration so successful
+
+21
+00:01:41,300 --> 00:01:43,800
+ Thank you for all that you do.
+
