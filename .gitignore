@@ -130,3 +130,6 @@ dist
 .pnp.*
 
 sample_clips/
+
+# Rust
+tts-rust/target/
